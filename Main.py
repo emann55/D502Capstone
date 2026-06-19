@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 1000)
@@ -7,7 +8,7 @@ pd.set_option('display.width', 1000)
 
 print("-" * 20 + " READING IN SEATTLE DATASET " + "-" * 20)
 # Load csv file
-df = pd.read_csv('CheckoutData.csv')
+df = pd.read_csv('CheckoutData.csv', low_memory=False)
 
 # Clean data
 # Convert data types from Checkouts, and CheckoutYear
@@ -165,3 +166,24 @@ plt.tight_layout()
 plt.savefig('most_checked_out_subjects_pie.png', bbox_inches='tight')
 
 print("-" * 20 + " GENERATED PIE CHART " + "-" * 20)
+
+########################## Start ANOVA Stats ###################################
+print("-" * 20 + " RUNNING ANOVA TEST " + "-" * 20)
+
+# filter our split subject frame (ssf) to only include rows belonging to the top 10 subjects
+# af = anova frame
+af = ssf[ssf['Subjects'].isin(top_10_subjects.index)]
+
+# create a group for the raw checkout quantities into a list of arrays for each subject
+# this creates a structure like: [ [array of checkouts for Fiction], [array for History], etc. ]
+subject_groups = [group['Checkouts'].values for name, group in af.groupby('Subjects')]
+
+# perform the one-way anova test using scipy
+# the asterisk (*) unpacks our list of arrays into individual arguments for f_oneway
+f_stat, p_value = stats.f_oneway(*subject_groups)
+
+print("Book Subject to Checkout Quantity Stats:")
+print(f"F-Statistic: {f_stat:,.4f}")
+print(f"P-Value:     {p_value}")
+
+print("-" * 20 + " FINISHED ANOVA TEST " + "-" * 20)
