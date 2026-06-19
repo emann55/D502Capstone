@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 1000)
 
+
+print("-" * 20 + " READING IN SEATTLE DATASET " + "-" * 20)
 # Load csv file
 df = pd.read_csv('CheckoutData.csv')
 
@@ -88,6 +90,34 @@ plt.gca().invert_yaxis()
 plt.savefig('most_checked_out_books.png', bbox_inches='tight')
 print("-" * 20 + " GENERATED BAR CHART " + "-" * 20)
 
+########################## Start Trend Chart #################################
+print("-" * 20 + " GENERATING TREND CHART " + "-" * 20)
+
+# sum all columns in the pivot table to get overall checkouts for each year
+# tf = trend frame (trend of total checkouts for each year)
+tf = cf_years.sum()
+
+# Clear previous chart from plt
+plt.figure(figsize=(12, 6))
+
+# plot the trend
+plt.plot(tf.index, tf.values, marker='o', color='#404788', linewidth=2.5, linestyle='-', zorder=1)
+scatter = plt.scatter(tf.index, tf.values, c=tf.index, cmap='viridis', s=100, zorder=2)
+
+plt.title('Total Library Checkout Volume Trends Across All Books', fontsize=16, fontweight='bold', pad=15)
+plt.xlabel('Year', fontsize=12)
+plt.ylabel('Total Checkouts (millions)', fontsize=12)
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.ylim(bottom=0)
+plt.tight_layout()
+
+# Ensure the index is displayed as an int, not a float
+plt.xticks(tf.index.astype(int))
+
+# Save the graph
+plt.savefig('total_checkouts_yearly_trend.png', bbox_inches='tight')
+print("-" * 20 + " GENERATED TREND CHART " + "-" * 20)
+
 ########################## Start Pie Chart ###################################
 print("-" * 20 + " GENERATING PIE CHART " + "-" * 20)
 # sf = subject frame
@@ -114,7 +144,7 @@ other = pd.Series([other_subjects], index=['Other'])
 # pf = pie frame (Combined data series for plotting)
 pf = pd.concat([top_10_subjects, other])
 
-# Clear bar chart from plt
+# Clear previous chart from plt
 plt.figure(figsize=(12, 10))
 
 # setup pie chart
