@@ -1,4 +1,6 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 1000)
 
@@ -59,3 +61,77 @@ print("\n" + "-" * 70 + "\n")
 print("-" * 20 + " RANDOM SAMPLE OF 10 UNIQUE BOOKS " + "-" * 20)
 print(jf.sample(10))
 print("-" * 75)
+
+print("-" * 20 + " GENERATING BAR CHART " + "-" * 20)
+
+# sort dataframe by top 10 books of all time
+top_10 = jf.sort_values(by='TotalAllTime', ascending=False).head(10)
+
+# set our index for easy display in the plot
+# we'll also isolate just the year_column, because that's all we need to compare for
+top_10 = top_10.set_index('Title')[year_columns]
+
+# create a horizontally grouped bar chart
+ax = top_10.plot(kind='barh', figsize=(14, 8), width=0.8, cmap='viridis')
+
+# set up the chart information
+plt.title('Top 10 Most Checked Out Books (Yearly Breakdown)', fontsize=16, fontweight='bold', pad=15)
+plt.xlabel('Number of Checkouts', fontsize=12)
+plt.ylabel('Book Title', fontsize=12)
+plt.legend(title='Checkout Year', bbox_to_anchor=(1.02, 1), loc='upper left')
+plt.tight_layout()
+
+# invert y-axis to show the most checked out at the top
+plt.gca().invert_yaxis()
+
+# save the graph
+plt.savefig('most_checked_out_books.png', bbox_inches='tight')
+print("-" * 20 + " GENERATED BAR CHART " + "-" * 20)
+
+########################## Start Pie Chart ###################################
+print("-" * 20 + " GENERATING PIE CHART " + "-" * 20)
+# sf = subject frame
+sf = cf.copy()
+# remove the csv in Subjects
+sf['Subjects'] = sf['Subjects'].str.split(',')
+
+# make each subject it's own column
+# ssf = split subject frame
+ssf = sf.explode('Subjects')
+ssf['Subjects'] = ssf['Subjects'].str.strip()
+ssf = ssf[ssf['Subjects'] != '']
+
+# get Total Checkout Numbers for each Subject
+subject_totals = ssf.groupby('Subjects')['Checkouts'].sum().sort_values(ascending=False)
+
+# separate the top 10 subjects from the rest to keep the chart readable
+top_10_subjects = subject_totals.head(10)
+other_subjects = subject_totals.iloc[10:].sum()
+
+other = pd.Series([other_subjects], index=['Other'])
+
+# Combine top 10 + Other back into one clean plotting series
+# pf = pie frame (Combined data series for plotting)
+pf = pd.concat([top_10_subjects, other])
+
+# Clear bar chart from plt
+plt.figure(figsize=(12, 10))
+
+# setup pie chart
+plt.pie(
+    pf,
+    labels=pf.index,
+    autopct='%1.1f%%',
+    startangle=140,
+    colors=plt.cm.tab20.colors,
+    textprops={'fontsize': 11}
+)
+
+plt.title('Subject Contribution to Total Checkout Volume', fontsize=16, fontweight='bold', pad=20)
+# Forces the chart to be a perfect circle
+plt.axis('equal')
+plt.tight_layout()
+
+plt.savefig('most_checked_out_subjects_pie.png', bbox_inches='tight')
+
+print("-" * 20 + " GENERATED PIE CHART " + "-" * 20)
