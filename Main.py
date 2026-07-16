@@ -65,6 +65,7 @@ print("-" * 20 + " RANDOM SAMPLE OF 10 UNIQUE BOOKS " + "-" * 20)
 print(jf.sample(10))
 print("-" * 75)
 
+########################## Start Bar Chart #################################
 print("-" * 20 + " GENERATING BAR CHART " + "-" * 20)
 
 # sort dataframe by top 10 books of all time
@@ -126,7 +127,7 @@ sf = cf.copy()
 # remove the csv in Subjects
 sf['Subjects'] = sf['Subjects'].str.split(',')
 
-# make each subject it's own column
+# make each subject its own column
 # ssf = split subject frame
 ssf = sf.explode('Subjects')
 ssf['Subjects'] = ssf['Subjects'].str.strip()
